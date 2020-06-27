@@ -1,0 +1,19 @@
+# base image
+FROM golang:1.14.3 AS builder
+
+# src files
+COPY . /appsrc
+
+# compile
+WORKDIR /appsrc/main
+RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -mod=vendor .
+
+# final image
+FROM scratch
+
+WORKDIR /app
+COPY --from=builder /appsrc/main/main .
+
+EXPOSE 10009
+
+CMD ["./main"]
